@@ -2,7 +2,29 @@
 
 A modern, secure, and university-grade digital platform designed to help students, faculty, and campus staff report, search for, verify, and recover lost belongings across university campuses.
 
-Built with **Java 17**, **Spring Boot 3.2**, **Spring Security 6**, **Spring Data JPA**, **Hibernate**, **MySQL 8**, and **Thymeleaf 3.1**.
+> **🌐 Live Public URL (GitHub Pages):** [https://leun-hammi.github.io/leun-hammi/](https://leun-hammi.github.io/leun-hammi/)  
+> **📦 GitHub Repository:** [https://github.com/leun-hammi/leun-hammi](https://github.com/leun-hammi/leun-hammi)  
+> **🛡️ Verification Engine:** 70 verified campus items (50 unique lost + 20 unique found) with interactive anti-theft ownership quiz gating.
+
+---
+
+## 🚀 Live Public Deployment Options
+
+### Option 1: GitHub Pages (Instant Interactive Public Showcase)
+The `/docs` directory contains a complete client deployment hosting all 70 campus belongings with the interactive image-based verification quiz:
+- **Public URL:** `https://leun-hammi.github.io/leun-hammi/`
+- **Activation:** In repository **Settings** &rarr; **Pages** &rarr; Build and deployment: **Deploy from a branch** &rarr; Branch: **`main`** &rarr; Folder: **`/docs`** &rarr; Click **Save**.
+
+### Option 2: Live Spring Boot + MySQL Backend Tunnel
+To expose your live running Spring Boot server to any public device:
+```cmd
+mvnw.cmd spring-boot:run
+```
+In a second terminal:
+```cmd
+npx localtunnel --port 8080
+```
+This gives you an instant public HTTPS URL (e.g. `https://campus-lost-found.loca.lt`) proxying directly to your local Java + MySQL backend.
 
 ---
 
