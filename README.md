@@ -2,8 +2,8 @@
 
 A modern, secure, and university-grade digital platform designed to help students, faculty, and campus staff report, search for, verify, and recover lost belongings across university campuses.
 
-> **🌐 Live Public URL (GitHub Pages):** [https://leun-hammi.github.io/leun-hammi/](https://leun-hammi.github.io/leun-hammi/)  
-> **📦 GitHub Repository:** [https://github.com/leun-hammi/leun-hammi](https://github.com/leun-hammi/leun-hammi)  
+> **🌐 Live Public URL (GitHub Pages):** [https://guru-prasanths.github.io/campus-lost-and-found/](https://guru-prasanths.github.io/campus-lost-and-found/)  
+> **📦 GitHub Repository:** [https://github.com/Guru-Prasanths/campus-lost-and-found](https://github.com/Guru-Prasanths/campus-lost-and-found)  
 > **🛡️ Verification Engine:** 70 verified campus items (50 unique lost + 20 unique found) with interactive anti-theft ownership quiz gating.
 
 ---
@@ -12,7 +12,7 @@ A modern, secure, and university-grade digital platform designed to help student
 
 ### Option 1: GitHub Pages (Instant Interactive Public Showcase)
 The `/docs` directory contains a complete client deployment hosting all 70 campus belongings with the interactive image-based verification quiz:
-- **Public URL:** `https://leun-hammi.github.io/leun-hammi/`
+- **Public URL:** `https://guru-prasanths.github.io/campus-lost-and-found/`
 - **Activation:** In repository **Settings** &rarr; **Pages** &rarr; Build and deployment: **Deploy from a branch** &rarr; Branch: **`main`** &rarr; Folder: **`/docs`** &rarr; Click **Save**.
 
 ### Option 2: Live Spring Boot + MySQL Backend Tunnel
