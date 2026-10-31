@@ -29,9 +29,10 @@ desktop.ini
 *.log
 logs/
 
-# Upload directory (keep dir structure only)
+# Upload directory (keep sample images and dir structure)
 uploads/items/*
 !uploads/items/.gitkeep
+!uploads/items/*.jpg
 
 # Environment
 .env

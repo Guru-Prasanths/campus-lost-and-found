@@ -20,3 +20,4 @@ COPY --from=builder --chown=appuser:appgroup /app/target/campus-lost-found-*.jar
 EXPOSE 8080
 ENV PORT=8080
 ENTRYPOINT ["java", "-jar", "app.jar"]
+

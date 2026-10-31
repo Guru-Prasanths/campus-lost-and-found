@@ -89,6 +89,7 @@ public class DataInitializer implements CommandLineRunner {
                     .approximateTime(LocalTime.of(15, 30))
                     .itemType(Item.ItemType.LOST)
                     .status(Item.ItemStatus.ACTIVE)
+                    .imagePath("macbook-pro.jpg")
                     .privateDetails("Serial # C02G789XYZ, Sticker of GitHub Octocat on bottom right corner, blue sleeve case.")
                     .reportedBy(student)
                     .build();
@@ -102,6 +103,7 @@ public class DataInitializer implements CommandLineRunner {
                     .approximateTime(LocalTime.of(13, 15))
                     .itemType(Item.ItemType.FOUND)
                     .status(Item.ItemStatus.ACTIVE)
+                    .imagePath("student-id.jpg")
                     .privateDetails("Name: Rohan K., Roll CS23045, barcode ending in 7741.")
                     .reportedBy(staff)
                     .build();
@@ -115,6 +117,7 @@ public class DataInitializer implements CommandLineRunner {
                     .approximateTime(LocalTime.of(17, 45))
                     .itemType(Item.ItemType.FOUND)
                     .status(Item.ItemStatus.ACTIVE)
+                    .imagePath("leather-wallet.jpg")
                     .privateDetails("Contains Rs. 650 cash, SBI debit card in front pocket, a college bus pass.")
                     .reportedBy(student)
                     .build();
@@ -128,6 +131,7 @@ public class DataInitializer implements CommandLineRunner {
                     .approximateTime(LocalTime.of(11, 0))
                     .itemType(Item.ItemType.LOST)
                     .status(Item.ItemStatus.ACTIVE)
+                    .imagePath("sony-headphones.jpg")
                     .privateDetails("Small scratch on left ear cup hinge, contains braided 3.5mm audio cable inside case.")
                     .reportedBy(staff)
                     .build();
@@ -141,6 +145,7 @@ public class DataInitializer implements CommandLineRunner {
                     .approximateTime(LocalTime.of(16, 20))
                     .itemType(Item.ItemType.LOST)
                     .status(Item.ItemStatus.RETURNED)
+                    .imagePath("dsa-notes.jpg")
                     .privateDetails("First page inscribed with 'Semester 4 DS Notes'.")
                     .reportedBy(student)
                     .build();
@@ -163,6 +168,35 @@ public class DataInitializer implements CommandLineRunner {
 
             log.info("Sample items and claims seeded successfully.");
         }
+
+        // 6. Ensure all existing items have realistic photos if unassigned
+        itemRepository.findAll().forEach(item -> {
+            if (item.getImagePath() == null || item.getImagePath().isBlank()) {
+                String name = item.getItemName().toLowerCase();
+                if (name.contains("macbook") || name.contains("laptop")) {
+                    item.setImagePath("macbook-pro.jpg");
+                } else if (name.contains("id card") || name.contains("card")) {
+                    item.setImagePath("student-id.jpg");
+                } else if (name.contains("wallet")) {
+                    item.setImagePath("leather-wallet.jpg");
+                } else if (name.contains("headphone") || name.contains("sony")) {
+                    item.setImagePath("sony-headphones.jpg");
+                } else if (name.contains("note") || name.contains("book")) {
+                    item.setImagePath("dsa-notes.jpg");
+                } else if (name.contains("bottle") || name.contains("flask")) {
+                    item.setImagePath("water-bottle.jpg");
+                } else if (name.contains("calculator")) {
+                    item.setImagePath("calculator.jpg");
+                } else if (name.contains("backpack") || name.contains("bag")) {
+                    item.setImagePath("college-backpack.jpg");
+                } else if (name.contains("key")) {
+                    item.setImagePath("keys-keychain.jpg");
+                }
+                if (item.getImagePath() != null) {
+                    itemRepository.save(item);
+                }
+            }
+        });
 
         log.info("=================================================");
         log.info("  CAMPUS LOST & FOUND - READY");
