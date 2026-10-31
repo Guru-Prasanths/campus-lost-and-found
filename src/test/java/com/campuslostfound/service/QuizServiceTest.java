@@ -145,3 +145,4 @@ public class QuizServiceTest {
         assertFalse(quizService.isItemVerifiedInSession(session, foundItem.getId()));
     }
 }
+

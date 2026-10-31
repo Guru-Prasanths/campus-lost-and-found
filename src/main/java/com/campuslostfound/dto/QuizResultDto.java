@@ -19,3 +19,4 @@ public class QuizResultDto {
     private String feedbackMessage;
     private Map<Long, Boolean> questionResults;
 }
+

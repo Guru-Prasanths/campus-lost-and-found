@@ -13,3 +13,4 @@ public interface QuizQuestionRepository extends JpaRepository<QuizQuestion, Long
     List<QuizQuestion> findByItemIdOrderByIdAsc(Long itemId);
     void deleteByItem(Item item);
 }
+

@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus Lost & Found | Official Campus Belongings Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="css/main.css">
+    <style>
+        /* GitHub Pages deployment enhancements */
+        .gh-banner {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            color: #f8fafc;
+            padding: 10px 16px;
+            font-size: 0.85rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .gh-banner-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .gh-banner-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .gh-pill {
+            background: #2563eb;
+            color: #fff;
+            padding: 2px 8px;
+            border-radius: 9999px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .gh-banner-links {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .gh-banner-link {
+            color: #93c5fd;
+            text-decoration: none;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s;
+        }
+        .gh-banner-link:hover {
+            color: #ffffff;
+            text-decoration: underline;
+        }
+
+        /* Modal styling for item detail, report, and claims */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 24px 16px;
+        }
+        .modal-overlay.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-dialog {
+            background: #ffffff;
+            border-radius: 16px;
+            max-width: 900px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            position: relative;
+            animation: modalFadeIn 0.25s ease-out;
+        }
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(12px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .modal-close-btn {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            background: #f1f5f9;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            color: #475569;
+            z-index: 10;
+            transition: all 0.2s;
+        }
+        .modal-close-btn:hover {
+            background: #e2e8f0;
+            color: #0f172a;
+        }
+        .modal-body {
+            padding: 28px;
+        }
+
+        /* Quiz UI in modal */
+        .quiz-option-label {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px 14px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            font-size: 0.92rem;
+            color: #1e293b;
+        }
+        .quiz-option-label:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+        .quiz-option-label.selected {
+            background: #eff6ff;
+            border-color: #3b82f6;
+            color: #1d4ed8;
+            font-weight: 500;
+        }
+        .quiz-option-label input[type="radio"] {
+            margin-top: 3px;
+        }
+        .quiz-feedback {
+            margin-top: 14px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            display: none;
+        }
+        .quiz-feedback.show {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .quiz-feedback.error {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+        }
+        .quiz-feedback.success {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #166534;
+        }
+
+        .stats-strip {
+            background: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 14px 0;
+        }
+        .stats-grid {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            text-align: center;
+        }
+        .stat-item strong {
+            display: block;
+            font-size: 1.4rem;
+            color: #1e293b;
+            font-weight: 700;
+        }
+        .stat-item span {
+            font-size: 0.8rem;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .hero-banner {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #06b6d4 100%);
+            color: #ffffff;
+            padding: 48px 0;
+            text-align: center;
+        }
+        .hero-banner h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+            letter-spacing: -0.02em;
+        }
+        .hero-banner p {
+            font-size: 1.05rem;
+            opacity: 0.95;
+            max-width: 680px;
+            margin: 0 auto 24px;
+        }
+        .hero-quick-tabs {
+            display: inline-flex;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 6px;
+            border-radius: 9999px;
+            backdrop-filter: blur(8px);
+        }
+        .hero-tab-btn {
+            background: transparent;
+            border: none;
+            color: #ffffff;
+            padding: 8px 18px;
+            border-radius: 9999px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.88rem;
+        }
+        .hero-tab-btn.active, .hero-tab-btn:hover {
+            background: #ffffff;
+            color: #1e3a8a;
+        }
+        .claim-card-empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: #64748b;
+        }
+        .toast-notification {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #0f172a;
+            color: #ffffff;
+            padding: 14px 20px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 2000;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .toast-notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+<!-- GitHub Deployment Banner -->
+<aside class="gh-banner" aria-label="Deployment Notice">
+    <div class="gh-banner-content">
+        <div class="gh-banner-left">
+            <span class="gh-pill">GitHub Pages Live</span>
+            <span>Campus Lost &amp; Found Client Deployment &bull; <strong>70 Verified Items</strong> with Anti-Theft Verification Quizzes</span>
+        </div>
+        <div class="gh-banner-links">
+            <a href="https://github.com/leun-hammi/leun-hammi" target="_blank" class="gh-banner-link">
+                <i class="fab fa-github"></i> Repository: leun-hammi/leun-hammi
+            </a>
+            <a href="#quick-stats" class="gh-banner-link">
+                <i class="fas fa-database"></i> 50 Lost &bull; 20 Found
+            </a>
+        </div>
+    </div>
+</aside>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+    <div class="container navbar-inner">
+        <a href="#" class="navbar-brand" onclick="filterByType(''); return false;">
+            <div class="brand-icon">
+                <i class="fas fa-search-location"></i>
+            </div>
+            <div class="brand-text">
+                <span class="brand-name">Campus</span>
+                <span class="brand-sub">Lost &amp; Found</span>
+            </div>
+        </a>
+
+        <div class="navbar-menu active">
+            <div class="navbar-links">
+                <a href="#" class="nav-link active" onclick="filterByType(''); return false;">
+                    <i class="fas fa-th-list"></i> Browse All (<span id="navCountTotal">70</span>)
+                </a>
+                <a href="#" class="nav-link" onclick="filterByType('LOST'); return false;">
+                    <i class="fas fa-exclamation-circle text-danger"></i> Lost Items (50)
+                </a>
+                <a href="#" class="nav-link" onclick="filterByType('FOUND'); return false;">
+                    <i class="fas fa-box-open text-success"></i> Found Items (20)
+                </a>
+                <a href="#" class="nav-link" onclick="openClaimsModal(); return false;">
+                    <i class="fas fa-clipboard-check"></i> My Claims <span class="count-badge" id="myClaimsBadge" style="display:none; background:#2563eb; color:#fff; border-radius:9999px; padding:2px 7px; font-size:0.75rem;">0</span>
+                </a>
+            </div>
+
+            <div class="navbar-actions">
+                <button onclick="openReportModal('LOST')" class="btn btn-outline" style="border-color:#ef4444; color:#ef4444;">
+                    <i class="fas fa-plus"></i> Report Lost
+                </button>
+                <button onclick="openReportModal('FOUND')" class="btn btn-primary" style="background:#10b981; border-color:#10b981;">
+                    <i class="fas fa-plus"></i> Report Found
+                </button>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- HERO BANNER -->
+<header class="hero-banner">
+    <div class="container">
+        <h1>Campus Lost &amp; Found Portal</h1>
+        <p>A smart, secure platform connecting students with missing belongings across all campus laboratories, classrooms, libraries, sports grounds, and hostels.</p>
+        
+        <div class="hero-quick-tabs">
+            <button class="hero-tab-btn active" id="heroTabAll" onclick="filterByType('')">
+                <i class="fas fa-boxes"></i> All Items (70)
+            </button>
+            <button class="hero-tab-btn" id="heroTabLost" onclick="filterByType('LOST')">
+                <i class="fas fa-exclamation-circle"></i> Lost Items (50)
+            </button>
+            <button class="hero-tab-btn" id="heroTabFound" onclick="filterByType('FOUND')">
+                <i class="fas fa-shield-alt"></i> Found Items + Quiz (20)
+            </button>
+        </div>
+    </div>
+</header>
+
+<!-- QUICK STATS STRIP -->
+<section class="stats-strip" id="quick-stats">
+    <div class="container stats-grid">
+        <div class="stat-item">
+            <strong id="statLostCount">50</strong>
+            <span>Lost Items Reported</span>
+        </div>
+        <div class="stat-item">
+            <strong id="statFoundCount">20</strong>
+            <span>Found Items Listed</span>
+        </div>
+        <div class="stat-item">
+            <strong id="statCategoriesCount">10</strong>
+            <span>Belonging Categories</span>
+        </div>
+        <div class="stat-item">
+            <strong>100%</strong>
+            <span>Anti-Fraud Quiz Protected</span>
+        </div>
+        <div class="stat-item">
+            <strong id="statCampusZones">11</strong>
+            <span>Campus Zones Covered</span>
+        </div>
+    </div>
+</section>
+
+<!-- MAIN BROWSE LAYOUT -->
+<div class="browse-layout container" style="margin-top: 32px; margin-bottom: 60px;">
+    <!-- FILTERS SIDEBAR -->
+    <aside class="filters-sidebar">
+        <div class="filters-card">
+            <div class="filters-header">
+                <h3><i class="fas fa-filter"></i> Filters</h3>
+                <a href="#" class="clear-filters" onclick="resetFilters(); return false;">Clear All</a>
+            </div>
+
+            <form id="filterForm" onsubmit="event.preventDefault(); applyFilters();">
+                <!-- Search Input -->
+                <div class="filter-group">
+                    <label class="filter-label" for="filterKeyword">Search</label>
+                    <div class="search-input-wrap">
+                        <input type="text" id="filterKeyword" class="form-control" placeholder="Search by name or detail..." oninput="applyFilters()">
+                        <i class="fas fa-search search-icon"></i>
+                    </div>
+                </div>
+
+                <!-- Type Selector -->
+                <div class="filter-group">
+                    <label class="filter-label">Item Type</label>
+                    <div class="type-toggle">
+                        <label class="type-option active" id="typeOptAll">
+                            <input type="radio" name="itemType" value="" checked onchange="applyFilters()"> All
+                        </label>
+                        <label class="type-option type-lost" id="typeOptLost">
+                            <input type="radio" name="itemType" value="LOST" onchange="applyFilters()">
+                            <i class="fas fa-exclamation-circle"></i> Lost
+                        </label>
+                        <label class="type-option type-found" id="typeOptFound">
+                            <input type="radio" name="itemType" value="FOUND" onchange="applyFilters()">
+                            <i class="fas fa-box-open"></i> Found
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Category -->
+                <div class="filter-group">
+                    <label class="filter-label" for="filterCategory">Category</label>
+                    <select id="filterCategory" class="form-control form-select" onchange="applyFilters()">
+                        <option value="">All Categories</option>
+                        <option value="ELECTRONICS">Electronics &amp; Gadgets</option>
+                        <option value="ID_CARDS">ID Cards &amp; Badges</option>
+                        <option value="WALLETS_MONEY">Wallets &amp; Money</option>
+                        <option value="BOOKS_NOTES">Books, Notes &amp; Records</option>
+                        <option value="KEYS">Keys &amp; Keychains</option>
+                        <option value="BAGS">Bags &amp; Backpacks</option>
+                        <option value="BOTTLES">Bottles &amp; Sippers</option>
+                        <option value="WATCHES">Watches &amp; Wearables</option>
+                        <option value="SPECTACLES">Spectacles &amp; Glasses</option>
+                        <option value="STATIONERY">Stationery &amp; Calculators</option>
+                    </select>
+                </div>
+
+                <!-- Location -->
+                <div class="filter-group">
+                    <label class="filter-label" for="filterLocation">Location</label>
+                    <input type="text" id="filterLocation" class="form-control" placeholder="e.g. Library, Lab, Canteen..." oninput="applyFilters()">
+                </div>
+
+                <!-- Sort -->
+                <div class="filter-group">
+                    <label class="filter-label" for="filterSort">Sort By</label>
+                    <select id="filterSort" class="form-control form-select" onchange="applyFilters()">
+                        <option value="newest">Newest Date First</option>
+                        <option value="oldest">Oldest Date First</option>
+                        <option value="name">Item Name (A-Z)</option>
+                    </select>
+                </div>
+
+                <button type="button" class="btn btn-primary btn-full" onclick="applyFilters()">
+                    <i class="fas fa-search"></i> Apply Filters
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <!-- ITEMS MAIN -->
+    <main class="items-main">
+        <div class="items-toolbar">
+            <div class="items-count">
+                Showing <strong id="visibleItemsCount">70</strong> of <strong id="totalItemsCount">70</strong> items
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="empty-state" style="display: none;">
+            <div class="empty-icon"><i class="fas fa-search"></i></div>
+            <h3>No Matching Belongings Found</h3>
+            <p>Try adjusting your search keyword, category, or location filter.</p>
+            <div class="empty-actions">
+                <button onclick="resetFilters()" class="btn btn-primary">Reset Filters</button>
+            </div>
+        </div>
+
+        <!-- Items Grid -->
+        <div class="items-grid" id="itemsGrid">
+            <!-- Dynamically populated by docs/js/app.js -->
+        </div>
+    </main>
+</div>
+
+<!-- ITEM DETAIL & QUIZ MODAL -->
+<div class="modal-overlay" id="detailModal">
+    <div class="modal-dialog">
+        <button class="modal-close-btn" onclick="closeDetailModal()" aria-label="Close modal">
+            <i class="fas fa-times"></i>
+        </button>
+        <div class="modal-body" id="detailModalBody">
+            <!-- Populated dynamically by app.js -->
+        </div>
+    </div>
+</div>
+
+<!-- REPORT ITEM MODAL -->
+<div class="modal-overlay" id="reportModal">
+    <div class="modal-dialog" style="max-width: 650px;">
+        <button class="modal-close-btn" onclick="closeReportModal()" aria-label="Close modal">
+            <i class="fas fa-times"></i>
+        </button>
+        <div class="modal-body">
+            <h2 id="reportModalTitle" style="font-size: 1.5rem; margin-bottom: 8px;">Report Item</h2>
+            <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 20px;">Submit details to add an item to the campus registry.</p>
+            
+            <form id="reportForm" onsubmit="handleReportSubmit(event)">
+                <input type="hidden" id="reportType" value="LOST">
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label class="form-label required">Item Name</label>
+                    <input type="text" id="reportName" class="form-control" required placeholder="e.g. Blue Dell Laptop Charger">
+                </div>
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label class="form-label required">Category</label>
+                    <select id="reportCategory" class="form-control form-select" required>
+                        <option value="ELECTRONICS">Electronics &amp; Gadgets</option>
+                        <option value="ID_CARDS">ID Cards &amp; Badges</option>
+                        <option value="WALLETS_MONEY">Wallets &amp; Money</option>
+                        <option value="BOOKS_NOTES">Books, Notes &amp; Records</option>
+                        <option value="KEYS">Keys &amp; Keychains</option>
+                        <option value="BAGS">Bags &amp; Backpacks</option>
+                        <option value="BOTTLES">Bottles &amp; Sippers</option>
+                        <option value="WATCHES">Watches &amp; Wearables</option>
+                        <option value="SPECTACLES">Spectacles &amp; Glasses</option>
+                        <option value="STATIONERY">Stationery &amp; Calculators</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label class="form-label required">Campus Location</label>
+                    <input type="text" id="reportLocation" class="form-control" required placeholder="e.g. Science Block Room 204">
+                </div>
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label class="form-label required">Date</label>
+                    <input type="date" id="reportDate" class="form-control" required>
+                </div>
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label class="form-label required">Detailed Description</label>
+                    <textarea id="reportDesc" class="form-control" rows="3" required placeholder="Describe appearance, stickers, color, distinctive marks..."></textarea>
+                </div>
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label class="form-label required">Your Full Name &amp; Contact</label>
+                    <input type="text" id="reportContact" class="form-control" required placeholder="e.g. Priya Sundaram (Roll CS202418, 9876543210)">
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">
+                    <i class="fas fa-paper-plane"></i> Submit to Campus Registry
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- MY CLAIMS MODAL -->
+<div class="modal-overlay" id="claimsModal">
+    <div class="modal-dialog" style="max-width: 750px;">
+        <button class="modal-close-btn" onclick="closeClaimsModal()" aria-label="Close modal">
+            <i class="fas fa-times"></i>
+        </button>
+        <div class="modal-body">
+            <h2 style="font-size: 1.5rem; margin-bottom: 6px;"><i class="fas fa-clipboard-check text-primary"></i> My Submitted Claims</h2>
+            <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 20px;">Records of ownership claims submitted through the verification quiz.</p>
+            <div id="claimsListContainer">
+                <!-- Dynamically rendered -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-notification" id="toastNotification">
+    <i class="fas fa-check-circle" style="color: #22c55e; font-size: 1.2rem;"></i>
+    <span id="toastMessage">Action completed successfully</span>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+    <div class="container">
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <div class="footer-logo">
+                    <div class="brand-icon">
+                        <i class="fas fa-search-location"></i>
+                    </div>
+                    <div class="brand-text">
+                        <span class="brand-name">Campus</span>
+                        <span class="brand-sub">Lost &amp; Found</span>
+                    </div>
+                </div>
+                <p class="footer-desc">A smarter and safer digital platform to reconnect students with their lost belongings across college classrooms, labs, libraries, and campus grounds.</p>
+                <div class="footer-social">
+                    <a href="https://github.com/leun-hammi/leun-hammi" target="_blank" class="social-link" title="GitHub Repository"><i class="fab fa-github"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
+                </div>
+            </div>
+
+            <div class="footer-col">
+                <h4 class="footer-heading">Quick Navigation</h4>
+                <ul class="footer-links">
+                    <li><a href="#" onclick="filterByType(''); return false;"><i class="fas fa-chevron-right"></i> All Items</a></li>
+                    <li><a href="#" onclick="filterByType('LOST'); return false;"><i class="fas fa-chevron-right"></i> Lost Items (50)</a></li>
+                    <li><a href="#" onclick="filterByType('FOUND'); return false;"><i class="fas fa-chevron-right"></i> Found Items (20)</a></li>
+                    <li><a href="#" onclick="openReportModal('LOST'); return false;"><i class="fas fa-chevron-right"></i> Report Lost</a></li>
+                    <li><a href="#" onclick="openReportModal('FOUND'); return false;"><i class="fas fa-chevron-right"></i> Report Found</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h4 class="footer-heading">Features</h4>
+                <ul class="footer-links">
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Image-Based Quiz Verification</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Anti-Theft Ownership Checks</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Full Campus Location Coverage</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Spring Boot + MySQL Backend</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h4 class="footer-heading">Campus Contact</h4>
+                <ul class="footer-contact">
+                    <li><i class="fas fa-map-marker-alt"></i> Campus Administration &bull; Security Office Desk</li>
+                    <li><i class="fas fa-envelope"></i> lostandfound@campus.edu</li>
+                    <li><i class="fas fa-code-branch"></i> GitHub: <code>leun-hammi/leun-hammi</code></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2026 Campus Lost &amp; Found Portal. Hosted on GitHub Pages &bull; All Rights Reserved.</p>
+        </div>
+    </div>
+</footer>
+
+<!-- SCRIPTS -->
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

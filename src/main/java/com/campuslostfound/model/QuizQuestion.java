@@ -45,3 +45,4 @@ public class QuizQuestion {
     @Column(length = 500)
     private String explanation;
 }
+

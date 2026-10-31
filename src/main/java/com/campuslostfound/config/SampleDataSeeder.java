@@ -1740,3 +1740,4 @@ public class SampleDataSeeder {
         return list;
     }
 }
+
