@@ -64,6 +64,10 @@ public class Item {
     @Column(nullable = false)
     private ItemStatus status = ItemStatus.ACTIVE;
 
+    @Builder.Default
+    @Column(name = "is_demo", nullable = false)
+    private boolean isDemo = false;
+
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
@@ -75,6 +79,12 @@ public class Item {
     @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Claim> claims;
+
+    @JsonIgnore
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<QuizQuestion> quizQuestions;
 
     @Column(updatable = false)
     private LocalDateTime createdAt;

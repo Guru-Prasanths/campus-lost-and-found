@@ -135,6 +135,7 @@
                     <i th:class="${item.itemType.name() == 'LOST'} ? 'fas fa-exclamation-circle' : 'fas fa-box-open'"></i>
                     <span th:text="${item.itemType.name()}">LOST</span>
                 </div>
+                <div class="item-demo-badge" th:if="${item.isDemo}"><i class="fas fa-flask"></i> Demo</div>
                 <div class="item-status-badge" th:if="${item.status.name() != 'ACTIVE'}"
                      th:classappend="'status-' + ${item.status.name().toLowerCase()}"
                      th:text="${item.status.name()}">CLAIMED</div>

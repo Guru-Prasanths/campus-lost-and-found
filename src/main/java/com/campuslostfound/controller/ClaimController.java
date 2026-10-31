@@ -29,6 +29,7 @@ public class ClaimController {
     private final ItemService itemService;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
+    private final com.campuslostfound.service.QuizService quizService;
 
     @GetMapping
     public String myClaims(@AuthenticationPrincipal UserDetails userDetails, Model model) {
@@ -75,10 +76,20 @@ public class ClaimController {
     public String submitClaim(@Valid @ModelAttribute("claimDto") ClaimDto dto,
                                BindingResult result,
                                @AuthenticationPrincipal UserDetails userDetails,
+                               jakarta.servlet.http.HttpSession session,
                                RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
             redirectAttributes.addFlashAttribute("errorMessage",
                     "Please provide detailed proof of ownership.");
+            return "redirect:/items/" + dto.getItemId();
+        }
+
+        Item item = itemService.findById(dto.getItemId())
+                .orElseThrow(() -> new RuntimeException("Item not found"));
+
+        if (item.getItemType() == Item.ItemType.FOUND && !quizService.isItemVerifiedInSession(session, item.getId())) {
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Ownership verification required: You must complete and pass the verification quiz before submitting a claim for this found item.");
             return "redirect:/items/" + dto.getItemId();
         }
 

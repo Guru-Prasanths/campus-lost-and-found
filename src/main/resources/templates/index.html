@@ -162,6 +162,7 @@
                     <i th:class="${item.itemType.name() == 'LOST'} ? 'fas fa-exclamation-circle' : 'fas fa-box-open'"></i>
                     <span th:text="${item.itemType.name()}">LOST</span>
                 </div>
+                <div class="item-demo-badge" th:if="${item.isDemo}"><i class="fas fa-flask"></i> Demo</div>
                 <div class="item-card-image">
                     <img th:if="${item.imagePath != null}" th:src="@{'/uploads/' + ${item.imagePath}}" alt="Item Image">
                     <div th:unless="${item.imagePath != null}" class="item-card-placeholder">

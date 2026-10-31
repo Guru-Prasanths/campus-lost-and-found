@@ -32,6 +32,12 @@
 
                 <!-- Item Details -->
                 <div class="detail-body">
+                    <!-- Demo Notice Banner -->
+                    <div class="demo-banner" th:if="${item.isDemo}">
+                        <i class="fas fa-flask"></i>
+                        <span><strong>Demonstration / Seeded Record:</strong> This entry is sample campus data provided for testing and system illustration purposes.</span>
+                    </div>
+
                     <div class="detail-header-row">
                         <div>
                             <span class="detail-category" th:text="${item.category.displayName}">Category</span>
@@ -170,38 +176,102 @@
                 <p>This is your reported item. You can manage it using the options below the description.</p>
             </div>
 
-            <!-- Claim Form -->
-            <div class="sidebar-card" th:if="${item.status.name() == 'ACTIVE' and (hasAlreadyClaimed == null or !hasAlreadyClaimed) and (isOwner == null or !isOwner)}"
+            <!-- Ownership Verification Quiz (For FOUND items when quiz not yet passed) -->
+            <div class="sidebar-quiz"
+                 th:if="${item.itemType.name() == 'FOUND' and item.status.name() == 'ACTIVE' and (hasAlreadyClaimed == null or !hasAlreadyClaimed) and (isOwner == null or !isOwner) and (hasPassedQuiz == null or !hasPassedQuiz)}"
+                 sec:authorize="isAuthenticated()">
+                <div class="sidebar-quiz-header">
+                    <i class="fas fa-shield-alt"></i>
+                    <h3>Ownership Verification Quiz</h3>
+                </div>
+                <div class="quiz-alert-error" th:if="${quizError != null}">
+                    <i class="fas fa-exclamation-circle"></i> <span th:text="${quizError}">Verification Failed</span>
+                </div>
+                <p class="quiz-instruction">
+                    <i class="fas fa-info-circle"></i> To prevent false claims, answer these questions regarding the verifiable physical characteristics of this found item before claiming.
+                </p>
+
+                <form th:action="@{'/items/' + ${item.id} + '/quiz/submit'}" method="post" class="quiz-form">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+                    <div th:each="q, stat : ${quizQuestions}" class="quiz-question-box">
+                        <div class="quiz-q-title">
+                            <strong th:text="${stat.count + '. '}">1. </strong>
+                            <span th:text="${q.questionText}">Question text</span>
+                        </div>
+                        <div class="quiz-options-list">
+                            <label class="quiz-option-label">
+                                <input type="radio" th:name="'q_' + ${q.id}" value="A" required>
+                                <span th:text="${q.optionA}">Option A</span>
+                            </label>
+                            <label class="quiz-option-label">
+                                <input type="radio" th:name="'q_' + ${q.id}" value="B">
+                                <span th:text="${q.optionB}">Option B</span>
+                            </label>
+                            <label class="quiz-option-label">
+                                <input type="radio" th:name="'q_' + ${q.id}" value="C">
+                                <span th:text="${q.optionC}">Option C</span>
+                            </label>
+                            <label class="quiz-option-label">
+                                <input type="radio" th:name="'q_' + ${q.id}" value="D">
+                                <span th:text="${q.optionD}">Option D</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-full" style="margin-top: 14px;">
+                        <i class="fas fa-check-double"></i> Submit Quiz &amp; Unlock Claim
+                    </button>
+                </form>
+            </div>
+
+            <!-- Quiz Verified Notice (When Quiz is passed for FOUND items) -->
+            <div class="quiz-verified-card"
+                 th:if="${item.itemType.name() == 'FOUND' and item.status.name() == 'ACTIVE' and (hasAlreadyClaimed == null or !hasAlreadyClaimed) and (isOwner == null or !isOwner) and hasPassedQuiz}"
+                 sec:authorize="isAuthenticated()">
+                <div class="quiz-verified-header">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Ownership Pre-Check Verified</span>
+                </div>
+                <p class="quiz-verified-text" th:text="${quizSuccess != null ? quizSuccess : 'You successfully passed the item verification quiz! Please complete the form below to register your official claim.'}">Verification Successful!</p>
+            </div>
+
+            <!-- Claim Form (Enabled for LOST items immediately, or FOUND items AFTER quiz is passed) -->
+            <div class="sidebar-card"
+                 th:if="${item.status.name() == 'ACTIVE' and (hasAlreadyClaimed == null or !hasAlreadyClaimed) and (isOwner == null or !isOwner) and (item.itemType.name() == 'LOST' or hasPassedQuiz)}"
                  sec:authorize="isAuthenticated()">
                 <div class="sidebar-card-header">
                     <i class="fas fa-clipboard-check"></i>
                     <h3>Submit a Claim</h3>
                 </div>
-                <p class="sidebar-card-desc">Do you think this is your item? Submit a claim with proof of ownership.</p>
+                <p class="sidebar-card-desc">
+                    <span th:if="${item.itemType.name() == 'FOUND'}">Provide your ownership details and contact info so administrators can arrange item hand-over.</span>
+                    <span th:unless="${item.itemType.name() == 'FOUND'}">Have you found this item or do you have information? Submit details to connect with the student.</span>
+                </p>
 
                 <form th:action="@{/claims/submit}" method="post" class="claim-form">
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                     <input type="hidden" name="itemId" th:value="${item.id}"/>
 
                     <div class="form-group">
-                        <label class="form-label required">Proof of Ownership</label>
+                        <label class="form-label required">Proof of Ownership / Details</label>
                         <textarea name="proofOfOwnership" class="form-control form-textarea-sm" required minlength="20"
-                                  placeholder="Describe in detail why this item belongs to you. Include specific details that only you would know..."></textarea>
+                                  placeholder="Describe specific details that only you would know (serial numbers, distinguishing marks, inside contents)..."></textarea>
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">Additional Information</label>
+                        <label class="form-label">Additional Contact Info / Note</label>
                         <textarea name="additionalInfo" class="form-control form-textarea-sm"
-                                  placeholder="Any additional information that can help verify your claim..."></textarea>
+                                  placeholder="Preferred phone number, hostel room, or available meeting time..."></textarea>
                     </div>
 
                     <div class="claim-warning">
                         <i class="fas fa-exclamation-triangle"></i>
-                        <small>False claims are taken seriously. Ensure you are the rightful owner before submitting.</small>
+                        <small>False claims are subject to campus disciplinary action. Please ensure all submitted details are accurate.</small>
                     </div>
 
                     <button type="submit" class="btn btn-primary btn-full">
-                        <i class="fas fa-clipboard-check"></i> Submit Claim
+                        <i class="fas fa-clipboard-check"></i> Submit Official Claim
                     </button>
                 </form>
             </div>

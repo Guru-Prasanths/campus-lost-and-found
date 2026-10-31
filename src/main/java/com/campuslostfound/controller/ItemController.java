@@ -25,6 +25,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/items")
@@ -35,6 +36,7 @@ public class ItemController {
     private final ClaimService claimService;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
+    private final com.campuslostfound.service.QuizService quizService;
 
     @GetMapping
     public String browseItems(
@@ -81,6 +83,7 @@ public class ItemController {
 
     @GetMapping("/{id}")
     public String itemDetail(@PathVariable Long id, Model model,
+                             jakarta.servlet.http.HttpSession session,
                              @AuthenticationPrincipal UserDetails userDetails) {
         Item item = itemService.findById(id)
                 .orElseThrow(() -> new RuntimeException("Item not found"));
@@ -90,6 +93,13 @@ public class ItemController {
 
         List<Claim> itemClaims = claimService.findItemClaims(item);
         model.addAttribute("claims", itemClaims);
+
+        boolean hasPassedQuiz = quizService.isItemVerifiedInSession(session, id);
+        model.addAttribute("hasPassedQuiz", hasPassedQuiz);
+
+        if (item.getItemType() == Item.ItemType.FOUND) {
+            model.addAttribute("quizQuestions", quizService.getQuizDtoForItem(item));
+        }
 
         if (userDetails != null) {
             userRepository.findByEmail(userDetails.getUsername()).ifPresent(user -> {
@@ -101,6 +111,26 @@ public class ItemController {
         }
 
         return "items/detail";
+    }
+
+    @PostMapping("/{id}/quiz/submit")
+    public String submitQuiz(@PathVariable Long id,
+                             @RequestParam Map<String, String> allParams,
+                             jakarta.servlet.http.HttpSession session,
+                             RedirectAttributes redirectAttributes) {
+        Item item = itemService.findById(id)
+                .orElseThrow(() -> new RuntimeException("Item not found"));
+
+        com.campuslostfound.dto.QuizResultDto result = quizService.evaluateQuiz(item, allParams, session);
+
+        if (result.isPassed()) {
+            redirectAttributes.addFlashAttribute("quizSuccess", result.getFeedbackMessage());
+        } else {
+            redirectAttributes.addFlashAttribute("quizError", result.getFeedbackMessage());
+        }
+        redirectAttributes.addFlashAttribute("quizResult", result);
+
+        return "redirect:/items/" + id;
     }
 
     @GetMapping("/report/lost")
