@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Home')}"></head>
+<body class="page-home">
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<!-- HERO SECTION -->
+<section class="hero">
+    <div class="hero-bg">
+        <div class="hero-shape hero-shape-1"></div>
+        <div class="hero-shape hero-shape-2"></div>
+        <div class="hero-shape hero-shape-3"></div>
+    </div>
+    <div class="container hero-content">
+        <div class="hero-badge">
+            <i class="fas fa-shield-alt"></i>
+            <span>Secure &amp; Verified Platform</span>
+        </div>
+        <h1 class="hero-title">
+            Lost Something<br>on Campus?<br>
+            <span class="hero-title-accent">Let's Find It.</span>
+        </h1>
+        <p class="hero-subtitle">
+            A smarter and safer way to reconnect students with their belongings.<br>
+            Advanced ownership verification ensures items reach their rightful owners.
+        </p>
+        <div class="hero-actions">
+            <a th:href="@{/items/report/lost}" class="btn btn-hero-primary" sec:authorize="isAuthenticated()">
+                <i class="fas fa-exclamation-circle"></i> Report Lost Item
+            </a>
+            <a th:href="@{/items/report/found}" class="btn btn-hero-secondary" sec:authorize="isAuthenticated()">
+                <i class="fas fa-box-open"></i> Report Found Item
+            </a>
+            <a th:href="@{/auth/register}" class="btn btn-hero-primary" sec:authorize="!isAuthenticated()">
+                <i class="fas fa-user-plus"></i> Get Started Free
+            </a>
+            <a th:href="@{/items}" class="btn btn-hero-outline">
+                <i class="fas fa-search"></i> Browse Items
+            </a>
+        </div>
+        <div class="hero-trust">
+            <div class="trust-item">
+                <i class="fas fa-lock"></i>
+                <span>Secure Verification</span>
+            </div>
+            <div class="trust-item">
+                <i class="fas fa-bolt"></i>
+                <span>Instant Notifications</span>
+            </div>
+            <div class="trust-item">
+                <i class="fas fa-users"></i>
+                <span>Campus Community</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- STATS SECTION -->
+<section class="stats-section">
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon stat-icon-blue">
+                    <i class="fas fa-clipboard-list"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number" th:text="${totalItems ?: 0}">0</div>
+                    <div class="stat-label">Total Items Reported</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon stat-icon-green">
+                    <i class="fas fa-check-double"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number" th:text="${recoveredItems ?: 0}">0</div>
+                    <div class="stat-label">Items Recovered</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon stat-icon-orange">
+                    <i class="fas fa-th-list"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number" th:text="${activeListings ?: 0}">0</div>
+                    <div class="stat-label">Active Listings</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon stat-icon-purple">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number" th:text="${totalUsers ?: 0}">0</div>
+                    <div class="stat-label">Registered Users</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-it-works">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-badge">Simple Process</div>
+            <h2 class="section-title">How It Works</h2>
+            <p class="section-subtitle">Recover your belongings in four simple steps</p>
+        </div>
+        <div class="steps-grid">
+            <div class="step-card">
+                <div class="step-number">01</div>
+                <div class="step-icon">
+                    <i class="fas fa-pen-to-square"></i>
+                </div>
+                <h3 class="step-title">Report an Item</h3>
+                <p class="step-desc">Submit a detailed report of your lost or found item with photographs and location information.</p>
+            </div>
+            <div class="step-arrow"><i class="fas fa-arrow-right"></i></div>
+            <div class="step-card">
+                <div class="step-number">02</div>
+                <div class="step-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <h3 class="step-title">Search Belongings</h3>
+                <p class="step-desc">Browse active listings using our powerful search filters to find your missing item quickly.</p>
+            </div>
+            <div class="step-arrow"><i class="fas fa-arrow-right"></i></div>
+            <div class="step-card">
+                <div class="step-number">03</div>
+                <div class="step-icon">
+                    <i class="fas fa-shield-check"></i>
+                </div>
+                <h3 class="step-title">Verify Ownership</h3>
+                <p class="step-desc">Submit proof of ownership through our secure verification system to authenticate your claim.</p>
+            </div>
+            <div class="step-arrow"><i class="fas fa-arrow-right"></i></div>
+            <div class="step-card">
+                <div class="step-number">04</div>
+                <div class="step-icon">
+                    <i class="fas fa-hand-holding-heart"></i>
+                </div>
+                <h3 class="step-title">Recover Your Item</h3>
+                <p class="step-desc">Once verified, collect your item from the designated location on campus.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- RECENT ITEMS -->
+<section class="recent-items-section" th:if="${recentItems != null and !recentItems.empty}">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-badge">Latest Listings</div>
+            <h2 class="section-title">Recently Reported Items</h2>
+            <p class="section-subtitle">Browse the most recently reported lost and found items on campus</p>
+        </div>
+        <div class="items-grid">
+            <div th:each="item : ${recentItems}" class="item-card">
+                <div class="item-card-badge" th:classappend="${item.itemType.name() == 'LOST'} ? 'badge-lost' : 'badge-found'">
+                    <i th:class="${item.itemType.name() == 'LOST'} ? 'fas fa-exclamation-circle' : 'fas fa-box-open'"></i>
+                    <span th:text="${item.itemType.name()}">LOST</span>
+                </div>
+                <div class="item-card-image">
+                    <img th:if="${item.imagePath != null}" th:src="@{'/uploads/' + ${item.imagePath}}" alt="Item Image">
+                    <div th:unless="${item.imagePath != null}" class="item-card-placeholder">
+                        <i class="fas fa-image"></i>
+                    </div>
+                </div>
+                <div class="item-card-body">
+                    <div class="item-category-tag" th:text="${item.category.displayName}">Electronics</div>
+                    <h3 class="item-name" th:text="${item.itemName}">Item Name</h3>
+                    <p class="item-desc" th:text="${#strings.abbreviate(item.description, 80)}">Description</p>
+                    <div class="item-meta">
+                        <span class="item-meta-tag">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span th:text="${item.location}">Location</span>
+                        </span>
+                        <span class="item-meta-tag">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span th:text="${#temporals.format(item.date, 'MMM dd, yyyy')}">Date</span>
+                        </span>
+                    </div>
+                    <a th:href="@{'/items/' + ${item.id}}" class="btn btn-view-item">
+                        View Details <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="section-footer">
+            <a th:href="@{/items}" class="btn btn-outline-primary btn-lg">
+                <i class="fas fa-th-list"></i> View All Items
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- VERIFICATION SECTION -->
+<section class="verification-section">
+    <div class="container">
+        <div class="verification-grid">
+            <div class="verification-content">
+                <div class="section-badge">Security First</div>
+                <h2 class="section-title">Advanced Ownership Verification</h2>
+                <p class="verification-desc">
+                    Our multi-layer verification system ensures that found items are returned only to their rightful owners, preventing fraudulent claims and protecting everyone on campus.
+                </p>
+                <div class="verification-features">
+                    <div class="verification-feature">
+                        <div class="feature-icon">
+                            <i class="fas fa-user-shield"></i>
+                        </div>
+                        <div class="feature-text">
+                            <h4>Identity Verification</h4>
+                            <p>All users are verified campus members with official college IDs.</p>
+                        </div>
+                    </div>
+                    <div class="verification-feature">
+                        <div class="feature-icon">
+                            <i class="fas fa-key"></i>
+                        </div>
+                        <div class="feature-text">
+                            <h4>Proof of Ownership</h4>
+                            <p>Claimants must provide detailed proof matching hidden item details.</p>
+                        </div>
+                    </div>
+                    <div class="verification-feature">
+                        <div class="feature-icon">
+                            <i class="fas fa-eye-slash"></i>
+                        </div>
+                        <div class="feature-text">
+                            <h4>Private Details</h4>
+                            <p>Sensitive item details are hidden from public view for security.</p>
+                        </div>
+                    </div>
+                    <div class="verification-feature">
+                        <div class="feature-icon">
+                            <i class="fas fa-bell"></i>
+                        </div>
+                        <div class="feature-text">
+                            <h4>Admin Review</h4>
+                            <p>All claims are reviewed by campus administrators before approval.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="verification-visual">
+                <div class="verification-card">
+                    <div class="vc-header">
+                        <i class="fas fa-clipboard-check"></i>
+                        <span>Claim Verification</span>
+                        <div class="vc-status">Active</div>
+                    </div>
+                    <div class="vc-item-info">
+                        <div class="vc-icon"><i class="fas fa-laptop"></i></div>
+                        <div>
+                            <div class="vc-item-name">MacBook Pro 14"</div>
+                            <div class="vc-item-meta">Electronics · Library Block A</div>
+                        </div>
+                    </div>
+                    <div class="vc-steps">
+                        <div class="vc-step completed"><i class="fas fa-check"></i> Claim Submitted</div>
+                        <div class="vc-step completed"><i class="fas fa-check"></i> Identity Verified</div>
+                        <div class="vc-step active"><i class="fas fa-spinner fa-spin"></i> Proof Review</div>
+                        <div class="vc-step pending"><i class="fas fa-circle"></i> Final Approval</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA SECTION -->
+<section class="cta-section">
+    <div class="container">
+        <div class="cta-content">
+            <h2 class="cta-title">Ready to Find Your Lost Item?</h2>
+            <p class="cta-subtitle">Join thousands of students who have already recovered their belongings through our platform.</p>
+            <div class="cta-actions">
+                <a th:href="@{/auth/register}" class="btn btn-cta-primary" sec:authorize="!isAuthenticated()">
+                    <i class="fas fa-user-plus"></i> Create Free Account
+                </a>
+                <a th:href="@{/items}" class="btn btn-cta-secondary">
+                    <i class="fas fa-search"></i> Browse Lost Items
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+
+<script th:src="@{/js/main.js}"></script>
+</body>
+</html>

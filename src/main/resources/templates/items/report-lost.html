@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Report Lost Item')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<div class="page-header page-header-danger">
+    <div class="container">
+        <div class="page-header-content">
+            <h1 class="page-title"><i class="fas fa-exclamation-circle"></i> Report Lost Item</h1>
+            <p class="page-subtitle">Provide as much detail as possible to help others identify your item</p>
+        </div>
+    </div>
+</div>
+
+<div class="container form-page-container">
+    <div class="form-card">
+        <div class="form-card-header form-header-lost">
+            <div class="form-header-icon"><i class="fas fa-exclamation-circle"></i></div>
+            <div>
+                <h2>Lost Item Details</h2>
+                <p>Your item report will be visible to all campus members. Private details will be used for ownership verification only.</p>
+            </div>
+        </div>
+
+        <form th:action="@{/items/report/lost}" th:object="${itemDto}" method="post"
+              enctype="multipart/form-data" class="report-form">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+            <div class="form-section">
+                <h3 class="form-section-title"><i class="fas fa-info-circle"></i> Basic Information</h3>
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label class="form-label required" for="itemName">Item Name</label>
+                        <input type="text" id="itemName" th:field="*{itemName}" class="form-control"
+                               th:classappend="${#fields.hasErrors('itemName')} ? 'is-invalid'"
+                               placeholder="e.g. Apple MacBook Pro, Blue Wallet">
+                        <span class="field-error" th:if="${#fields.hasErrors('itemName')}" th:errors="*{itemName}"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label required" for="category">Category</label>
+                        <select id="category" th:field="*{category}" class="form-control form-select"
+                                th:classappend="${#fields.hasErrors('category')} ? 'is-invalid'">
+                            <option value="">Select category</option>
+                            <option th:each="cat : ${categories}" th:value="${cat.name()}" th:text="${cat.displayName}"></option>
+                        </select>
+                        <span class="field-error" th:if="${#fields.hasErrors('category')}" th:errors="*{category}"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label required" for="description">Description</label>
+                    <textarea id="description" th:field="*{description}" class="form-control form-textarea"
+                              th:classappend="${#fields.hasErrors('description')} ? 'is-invalid'"
+                              placeholder="Describe the item in detail: color, size, brand, any special marks or features..."></textarea>
+                    <span class="field-error" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></span>
+                    <div class="char-counter"><span id="descCount">0</span>/2000</div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3 class="form-section-title"><i class="fas fa-map-marker-alt"></i> Location &amp; Time</h3>
+                <div class="form-row-3">
+                    <div class="form-group">
+                        <label class="form-label required" for="location">Last Seen Location</label>
+                        <input type="text" id="location" th:field="*{location}" class="form-control"
+                               th:classappend="${#fields.hasErrors('location')} ? 'is-invalid'"
+                               placeholder="e.g. Library 2nd Floor, Block A Canteen">
+                        <span class="field-error" th:if="${#fields.hasErrors('location')}" th:errors="*{location}"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label required" for="date">Date Lost</label>
+                        <input type="date" id="date" th:field="*{date}" class="form-control"
+                               th:classappend="${#fields.hasErrors('date')} ? 'is-invalid'">
+                        <span class="field-error" th:if="${#fields.hasErrors('date')}" th:errors="*{date}"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="approximateTime">Approximate Time</label>
+                        <input type="time" id="approximateTime" th:field="*{approximateTime}" class="form-control">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3 class="form-section-title"><i class="fas fa-camera"></i> Item Photograph</h3>
+                <div class="form-group">
+                    <label class="form-label" for="image">Upload Image (Optional)</label>
+                    <div class="file-upload-area" id="fileUploadArea">
+                        <input type="file" id="image" th:field="*{image}" class="file-input"
+                               accept="image/*" onchange="previewImage(this)">
+                        <div class="file-upload-content">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>Drag &amp; drop or <span class="upload-link">browse files</span></p>
+                            <small>JPG, PNG, GIF up to 10MB</small>
+                        </div>
+                        <img id="imagePreview" class="image-preview" style="display:none;" alt="Preview">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section form-section-private">
+                <div class="private-header">
+                    <i class="fas fa-lock"></i>
+                    <div>
+                        <h3 class="form-section-title">Private Identifying Details</h3>
+                        <p class="form-section-desc">These details will NOT be shown publicly. They will be used to verify ownership claims. Include unique details like serial numbers, contents, personal marks, etc.</p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <textarea id="privateDetails" th:field="*{privateDetails}" class="form-control form-textarea"
+                              placeholder="e.g. Serial number: XYZ123, has a sticker on back, contains specific items..."></textarea>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a th:href="@{/dashboard}" class="btn btn-ghost">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+                <button type="submit" class="btn btn-danger btn-lg">
+                    <i class="fas fa-exclamation-circle"></i> Submit Lost Item Report
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<script th:src="@{/js/main.js}"></script>
+<script>
+function previewImage(input) {
+    const preview = document.getElementById('imagePreview');
+    const content = document.querySelector('.file-upload-content');
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = e => {
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+            content.style.display = 'none';
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+const desc = document.getElementById('description');
+const counter = document.getElementById('descCount');
+if (desc && counter) {
+    desc.addEventListener('input', () => counter.textContent = desc.value.length);
+}
+</script>
+</body>
+</html>

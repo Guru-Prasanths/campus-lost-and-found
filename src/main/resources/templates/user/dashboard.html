@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Dashboard')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<div class="dashboard-layout">
+    <!-- Dashboard Sidebar -->
+    <aside class="dashboard-sidebar">
+        <div class="sidebar-user">
+            <div class="sidebar-avatar">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="sidebar-user-info">
+                <div class="sidebar-user-name" th:text="${currentUser.fullName}">User Name</div>
+                <div class="sidebar-user-role">
+                    <span class="role-badge" th:classappend="'role-' + ${currentUser.role.name().toLowerCase()}"
+                          th:text="${currentUser.role.name()}">STUDENT</span>
+                </div>
+                <div class="sidebar-user-id" th:text="${currentUser.collegeId}">ID</div>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="#overview" class="sidebar-nav-item active" onclick="showSection('overview', this)">
+                <i class="fas fa-tachometer-alt"></i> Overview
+            </a>
+            <a href="#lost-items" class="sidebar-nav-item" onclick="showSection('lost-items', this)">
+                <i class="fas fa-exclamation-circle"></i> My Lost Items
+                <span class="nav-count" th:text="${totalLostReported}">0</span>
+            </a>
+            <a href="#found-items" class="sidebar-nav-item" onclick="showSection('found-items', this)">
+                <i class="fas fa-box-open"></i> My Found Items
+                <span class="nav-count" th:text="${totalFoundReported}">0</span>
+            </a>
+            <a href="#claims" class="sidebar-nav-item" onclick="showSection('claims', this)">
+                <i class="fas fa-clipboard-check"></i> My Claims
+                <span class="nav-count" th:text="${totalClaimsSubmitted}">0</span>
+            </a>
+            <a href="#notifications" class="sidebar-nav-item" onclick="showSection('notifications', this)">
+                <i class="fas fa-bell"></i> Notifications
+                <span class="nav-count nav-count-alert" th:if="${unreadNotifications > 0}" th:text="${unreadNotifications}">0</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-actions">
+            <a th:href="@{/items/report/lost}" class="btn btn-danger btn-full btn-sm">
+                <i class="fas fa-plus"></i> Report Lost
+            </a>
+            <a th:href="@{/items/report/found}" class="btn btn-success btn-full btn-sm" style="margin-top: 8px">
+                <i class="fas fa-plus"></i> Report Found
+            </a>
+        </div>
+    </aside>
+
+    <!-- Dashboard Main -->
+    <main class="dashboard-main">
+        <div class="dashboard-header">
+            <div th:replace="~{fragments/layout :: flash-messages}"></div>
+            <div class="dashboard-welcome">
+                <h1>Welcome back, <span th:text="${currentUser.fullName.split(' ')[0]}">User</span>! 👋</h1>
+                <p>Here's an overview of your activity on Campus Lost &amp; Found</p>
+            </div>
+        </div>
+
+        <!-- OVERVIEW SECTION -->
+        <section id="overview" class="dashboard-section active">
+            <div class="dash-stats-grid">
+                <div class="dash-stat-card dash-stat-lost">
+                    <div class="dash-stat-icon"><i class="fas fa-exclamation-circle"></i></div>
+                    <div class="dash-stat-content">
+                        <div class="dash-stat-number" th:text="${totalLostReported}">0</div>
+                        <div class="dash-stat-label">Lost Items Reported</div>
+                    </div>
+                </div>
+                <div class="dash-stat-card dash-stat-found">
+                    <div class="dash-stat-icon"><i class="fas fa-box-open"></i></div>
+                    <div class="dash-stat-content">
+                        <div class="dash-stat-number" th:text="${totalFoundReported}">0</div>
+                        <div class="dash-stat-label">Found Items Reported</div>
+                    </div>
+                </div>
+                <div class="dash-stat-card dash-stat-claims">
+                    <div class="dash-stat-icon"><i class="fas fa-clipboard-list"></i></div>
+                    <div class="dash-stat-content">
+                        <div class="dash-stat-number" th:text="${totalClaimsSubmitted}">0</div>
+                        <div class="dash-stat-label">Claims Submitted</div>
+                    </div>
+                </div>
+                <div class="dash-stat-card dash-stat-approved">
+                    <div class="dash-stat-icon"><i class="fas fa-check-double"></i></div>
+                    <div class="dash-stat-content">
+                        <div class="dash-stat-number" th:text="${totalApprovedClaims}">0</div>
+                        <div class="dash-stat-label">Approved Claims</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions-card">
+                <h3 class="card-title">Quick Actions</h3>
+                <div class="quick-actions-grid">
+                    <a th:href="@{/items/report/lost}" class="quick-action quick-action-lost">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span>Report Lost Item</span>
+                    </a>
+                    <a th:href="@{/items/report/found}" class="quick-action quick-action-found">
+                        <i class="fas fa-box-open"></i>
+                        <span>Report Found Item</span>
+                    </a>
+                    <a th:href="@{/items}" class="quick-action quick-action-browse">
+                        <i class="fas fa-search"></i>
+                        <span>Browse All Items</span>
+                    </a>
+                    <a th:href="@{/claims}" class="quick-action quick-action-claims">
+                        <i class="fas fa-clipboard-check"></i>
+                        <span>View My Claims</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Pending Claims -->
+            <div class="dash-card" th:if="${pendingClaims != null and !pendingClaims.empty}">
+                <div class="dash-card-header">
+                    <h3 class="card-title"><i class="fas fa-clock text-warning"></i> Pending Claims</h3>
+                    <a th:href="@{/claims}" class="view-all-link">View All</a>
+                </div>
+                <div th:each="claim : ${pendingClaims}" class="activity-row">
+                    <div class="activity-icon activity-icon-pending"><i class="fas fa-clock"></i></div>
+                    <div class="activity-content">
+                        <div class="activity-title" th:text="${claim.item.itemName}">Item Name</div>
+                        <div class="activity-sub">Claim submitted on <span th:text="${#temporals.format(claim.createdAt, 'MMM dd, yyyy')}">Date</span></div>
+                    </div>
+                    <a th:href="@{'/claims/' + ${claim.id}}" class="btn btn-sm btn-outline">View</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- LOST ITEMS SECTION -->
+        <section id="lost-items" class="dashboard-section">
+            <div class="dash-card">
+                <div class="dash-card-header">
+                    <h3 class="card-title"><i class="fas fa-exclamation-circle text-danger"></i> My Lost Items</h3>
+                    <a th:href="@{/items/report/lost}" class="btn btn-sm btn-danger-outline">
+                        <i class="fas fa-plus"></i> Report New
+                    </a>
+                </div>
+                <div th:if="${lostItems == null or lostItems.empty}" class="empty-state-sm">
+                    <i class="fas fa-inbox"></i>
+                    <p>No lost items reported yet</p>
+                    <a th:href="@{/items/report/lost}" class="btn btn-primary btn-sm">Report a Lost Item</a>
+                </div>
+                <div class="items-list" th:unless="${lostItems == null or lostItems.empty}">
+                    <div th:each="item : ${lostItems}" class="item-list-row">
+                        <div class="item-list-image">
+                            <img th:if="${item.imagePath != null}" th:src="@{'/uploads/' + ${item.imagePath}}" alt="Item">
+                            <div th:unless="${item.imagePath != null}" class="item-list-placeholder">
+                                <i class="fas fa-box"></i>
+                            </div>
+                        </div>
+                        <div class="item-list-info">
+                            <div class="item-list-name" th:text="${item.itemName}">Item Name</div>
+                            <div class="item-list-meta">
+                                <span th:text="${item.category.displayName}">Category</span>
+                                <span>·</span>
+                                <span th:text="${item.location}">Location</span>
+                                <span>·</span>
+                                <span th:text="${#temporals.format(item.date, 'MMM dd, yyyy')}">Date</span>
+                            </div>
+                        </div>
+                        <span class="status-badge status-sm" th:classappend="'status-' + ${item.status.name().toLowerCase()}"
+                              th:text="${item.status.name()}">ACTIVE</span>
+                        <a th:href="@{'/items/' + ${item.id}}" class="btn btn-sm btn-outline">View</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FOUND ITEMS SECTION -->
+        <section id="found-items" class="dashboard-section">
+            <div class="dash-card">
+                <div class="dash-card-header">
+                    <h3 class="card-title"><i class="fas fa-box-open text-success"></i> My Found Items</h3>
+                    <a th:href="@{/items/report/found}" class="btn btn-sm btn-success-outline">
+                        <i class="fas fa-plus"></i> Report New
+                    </a>
+                </div>
+                <div th:if="${foundItems == null or foundItems.empty}" class="empty-state-sm">
+                    <i class="fas fa-inbox"></i>
+                    <p>No found items reported yet</p>
+                    <a th:href="@{/items/report/found}" class="btn btn-primary btn-sm">Report a Found Item</a>
+                </div>
+                <div class="items-list" th:unless="${foundItems == null or foundItems.empty}">
+                    <div th:each="item : ${foundItems}" class="item-list-row">
+                        <div class="item-list-image">
+                            <img th:if="${item.imagePath != null}" th:src="@{'/uploads/' + ${item.imagePath}}" alt="Item">
+                            <div th:unless="${item.imagePath != null}" class="item-list-placeholder"><i class="fas fa-box"></i></div>
+                        </div>
+                        <div class="item-list-info">
+                            <div class="item-list-name" th:text="${item.itemName}">Item Name</div>
+                            <div class="item-list-meta">
+                                <span th:text="${item.category.displayName}">Category</span> ·
+                                <span th:text="${item.location}">Location</span> ·
+                                <span th:text="${#temporals.format(item.date, 'MMM dd, yyyy')}">Date</span>
+                            </div>
+                        </div>
+                        <span class="status-badge status-sm" th:classappend="'status-' + ${item.status.name().toLowerCase()}"
+                              th:text="${item.status.name()}">ACTIVE</span>
+                        <a th:href="@{'/items/' + ${item.id}}" class="btn btn-sm btn-outline">View</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CLAIMS SECTION -->
+        <section id="claims" class="dashboard-section">
+            <div class="dash-card">
+                <div class="dash-card-header">
+                    <h3 class="card-title"><i class="fas fa-clipboard-check"></i> My Claims</h3>
+                </div>
+                <div th:if="${allClaims == null or allClaims.empty}" class="empty-state-sm">
+                    <i class="fas fa-clipboard"></i>
+                    <p>No claims submitted yet</p>
+                    <a th:href="@{/items}" class="btn btn-primary btn-sm">Browse Items to Claim</a>
+                </div>
+                <div class="claims-list" th:unless="${allClaims == null or allClaims.empty}">
+                    <div th:each="claim : ${allClaims}" class="claim-list-row">
+                        <div class="claim-list-info">
+                            <div class="claim-item-name" th:text="${claim.item.itemName}">Item Name</div>
+                            <div class="claim-list-meta">
+                                <span th:text="${claim.item.category.displayName}">Category</span> ·
+                                <span th:text="${#temporals.format(claim.createdAt, 'MMM dd, yyyy')}">Date</span>
+                            </div>
+                        </div>
+                        <span class="status-badge status-sm" th:classappend="'claim-status-' + ${claim.status.name().toLowerCase()}"
+                              th:text="${claim.status.name()}">PENDING</span>
+                        <a th:href="@{'/claims/' + ${claim.id}}" class="btn btn-sm btn-outline">View</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- NOTIFICATIONS SECTION -->
+        <section id="notifications" class="dashboard-section">
+            <div class="dash-card">
+                <div class="dash-card-header">
+                    <h3 class="card-title"><i class="fas fa-bell"></i> Notifications</h3>
+                </div>
+                <div th:if="${notifications == null or notifications.empty}" class="empty-state-sm">
+                    <i class="fas fa-bell-slash"></i>
+                    <p>No notifications yet</p>
+                </div>
+                <div class="notifications-list" th:unless="${notifications == null or notifications.empty}">
+                    <div th:each="notif : ${notifications}"
+                         class="notification-row"
+                         th:classappend="${!notif.read} ? 'notification-unread'">
+                        <div class="notif-icon">
+                            <i class="fas fa-bell"></i>
+                        </div>
+                        <div class="notif-content">
+                            <div class="notif-title" th:text="${notif.title}">Title</div>
+                            <div class="notif-message" th:text="${notif.message}">Message</div>
+                            <div class="notif-time" th:text="${#temporals.format(notif.createdAt, 'MMM dd, yyyy HH:mm')}">Time</div>
+                        </div>
+                        <div class="notif-unread-dot" th:unless="${notif.read}"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<script th:src="@{/js/main.js}"></script>
+<script>
+function showSection(id, link) {
+    document.querySelectorAll('.dashboard-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.sidebar-nav-item').forEach(l => l.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    link.classList.add('active');
+    return false;
+}
+</script>
+</body>
+</html>
+

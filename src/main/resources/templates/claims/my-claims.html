@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('My Claims')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<div class="page-header">
+    <div class="container">
+        <div th:replace="~{fragments/layout :: flash-messages}"></div>
+        <div class="page-header-content">
+            <h1 class="page-title"><i class="fas fa-clipboard-check"></i> My Claims</h1>
+            <p class="page-subtitle">Track the status of all your ownership claims</p>
+        </div>
+    </div>
+</div>
+
+<div class="container page-content">
+    <div th:if="${claims == null or claims.empty}" class="empty-state">
+        <div class="empty-icon"><i class="fas fa-clipboard"></i></div>
+        <h3>No Claims Yet</h3>
+        <p>You haven't submitted any ownership claims yet. Browse items to find and claim your belongings.</p>
+        <a th:href="@{/items}" class="btn btn-primary">Browse Items</a>
+    </div>
+
+    <div class="claims-grid" th:unless="${claims == null or claims.empty}">
+        <div th:each="claim : ${claims}" class="claim-card">
+            <div class="claim-card-header">
+                <div class="claim-card-item-info">
+                    <div class="claim-item-badge" th:classappend="${claim.item.itemType.name() == 'LOST'} ? 'badge-lost' : 'badge-found'">
+                        <span th:text="${claim.item.itemType.name()}">LOST</span>
+                    </div>
+                    <h3 class="claim-item-name" th:text="${claim.item.itemName}">Item Name</h3>
+                    <span class="claim-category" th:text="${claim.item.category.displayName}">Category</span>
+                </div>
+                <div class="claim-status-badge" th:classappend="'claim-status-' + ${claim.status.name().toLowerCase()}"
+                     th:text="${claim.status.name()}">PENDING</div>
+            </div>
+            <div class="claim-card-body">
+                <div class="claim-meta">
+                    <span><i class="fas fa-map-marker-alt"></i> <span th:text="${claim.item.location}">Location</span></span>
+                    <span><i class="fas fa-calendar"></i> Claimed on <span th:text="${#temporals.format(claim.createdAt, 'MMM dd, yyyy')}">Date</span></span>
+                </div>
+                <div class="claim-proof-preview">
+                    <strong>Your Proof:</strong>
+                    <p th:text="${#strings.abbreviate(claim.proofOfOwnership, 120)}">Proof...</p>
+                </div>
+                <div class="claim-admin-notes" th:if="${claim.adminNotes != null and !claim.adminNotes.isEmpty()}">
+                    <strong><i class="fas fa-comment"></i> Admin Notes:</strong>
+                    <p th:text="${claim.adminNotes}">Notes</p>
+                </div>
+            </div>
+            <div class="claim-card-footer">
+                <a th:href="@{'/items/' + ${claim.item.id}}" class="btn btn-sm btn-outline">
+                    <i class="fas fa-external-link-alt"></i> View Item
+                </a>
+                <a th:href="@{'/claims/' + ${claim.id}}" class="btn btn-sm btn-primary">
+                    <i class="fas fa-eye"></i> View Claim
+                </a>
+                <form th:if="${claim.status.name() == 'PENDING'}"
+                      th:action="@{'/claims/' + ${claim.id} + '/withdraw'}" method="post" style="display:inline">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <button type="submit" class="btn btn-sm btn-ghost" onclick="return confirm('Withdraw this claim?')">
+                        <i class="fas fa-times"></i> Withdraw
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<script th:src="@{/js/main.js}"></script>
+</body>
+</html>
+

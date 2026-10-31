@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title} + ' | Campus Lost & Found'">Campus Lost & Found</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+</head>
+<body>
+
+<!-- NAVBAR FRAGMENT -->
+<nav th:fragment="navbar" class="navbar">
+    <div class="container navbar-inner">
+        <a th:href="@{/}" class="navbar-brand">
+            <div class="brand-icon">
+                <i class="fas fa-search-location"></i>
+            </div>
+            <div class="brand-text">
+                <span class="brand-name">Campus</span>
+                <span class="brand-sub">Lost &amp; Found</span>
+            </div>
+        </a>
+
+        <button class="navbar-toggle" id="navToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <div class="navbar-menu" id="navMenu">
+            <div class="navbar-links">
+                <a th:href="@{/}" class="nav-link">
+                    <i class="fas fa-home"></i> Home
+                </a>
+                <a th:href="@{/items}" class="nav-link">
+                    <i class="fas fa-th-list"></i> Browse Items
+                </a>
+                <a th:href="@{/items/report/lost}" class="nav-link" sec:authorize="isAuthenticated()">
+                    <i class="fas fa-exclamation-circle"></i> Report Lost
+                </a>
+                <a th:href="@{/items/report/found}" class="nav-link" sec:authorize="isAuthenticated()">
+                    <i class="fas fa-box-open"></i> Report Found
+                </a>
+                <a th:href="@{/claims}" class="nav-link" sec:authorize="isAuthenticated()">
+                    <i class="fas fa-clipboard-check"></i> My Claims
+                </a>
+                <a th:href="@{/admin}" class="nav-link nav-admin" sec:authorize="hasRole('ADMIN')">
+                    <i class="fas fa-shield-alt"></i> Admin
+                </a>
+            </div>
+
+            <div class="navbar-actions">
+                <!-- Logged in user -->
+                <div class="user-menu" sec:authorize="isAuthenticated()">
+                    <a th:href="@{/dashboard}" class="nav-dashboard-btn">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a>
+                    <div class="user-dropdown">
+                        <button class="user-avatar-btn" id="userDropBtn">
+                            <div class="user-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <span class="user-name" sec:authentication="name">User</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="dropdown-menu" id="userDropMenu">
+                            <a th:href="@{/dashboard}" class="dropdown-item">
+                                <i class="fas fa-tachometer-alt"></i> Dashboard
+                            </a>
+                            <a th:href="@{/profile}" class="dropdown-item">
+                                <i class="fas fa-user-circle"></i> Profile
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a th:href="@{/auth/logout}" class="dropdown-item text-danger">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Not logged in -->
+                <div sec:authorize="!isAuthenticated()" class="auth-buttons">
+                    <a th:href="@{/auth/login}" class="btn btn-outline">Login</a>
+                    <a th:href="@{/auth/register}" class="btn btn-primary">Register</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- FOOTER FRAGMENT -->
+<footer th:fragment="footer" class="footer">
+    <div class="container">
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <div class="footer-logo">
+                    <div class="brand-icon">
+                        <i class="fas fa-search-location"></i>
+                    </div>
+                    <div class="brand-text">
+                        <span class="brand-name">Campus</span>
+                        <span class="brand-sub">Lost &amp; Found</span>
+                    </div>
+                </div>
+                <p class="footer-desc">A smarter and safer platform to reconnect students with their lost belongings on campus.</p>
+                <div class="footer-social">
+                    <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
+                </div>
+            </div>
+
+            <div class="footer-col">
+                <h4 class="footer-heading">Quick Links</h4>
+                <ul class="footer-links">
+                    <li><a th:href="@{/}"><i class="fas fa-chevron-right"></i> Home</a></li>
+                    <li><a th:href="@{/items}"><i class="fas fa-chevron-right"></i> Browse Items</a></li>
+                    <li><a th:href="@{/items/report/lost}"><i class="fas fa-chevron-right"></i> Report Lost Item</a></li>
+                    <li><a th:href="@{/items/report/found}"><i class="fas fa-chevron-right"></i> Report Found Item</a></li>
+                    <li><a th:href="@{/dashboard}"><i class="fas fa-chevron-right"></i> Dashboard</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h4 class="footer-heading">Information</h4>
+                <ul class="footer-links">
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> About Platform</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> How It Works</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Privacy Policy</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> Terms &amp; Conditions</a></li>
+                    <li><a href="#"><i class="fas fa-chevron-right"></i> FAQ</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h4 class="footer-heading">Contact</h4>
+                <ul class="footer-contact">
+                    <li><i class="fas fa-map-marker-alt"></i> Campus Administration Building</li>
+                    <li><i class="fas fa-envelope"></i> lostandfound@campus.edu</li>
+                    <li><i class="fas fa-phone"></i> +91 98765 43210</li>
+                    <li><i class="fas fa-clock"></i> Mon-Fri: 9:00 AM - 5:00 PM</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2024 Campus Lost &amp; Found. All rights reserved.</p>
+            <p>Built with <i class="fas fa-heart text-danger"></i> for the student community</p>
+        </div>
+    </div>
+</footer>
+
+<!-- FLASH MESSAGES FRAGMENT -->
+<div th:fragment="flash-messages">
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible">
+        <i class="fas fa-check-circle"></i>
+        <span th:text="${successMessage}"></span>
+        <button class="alert-close" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-error alert-dismissible">
+        <i class="fas fa-exclamation-circle"></i>
+        <span th:text="${errorMessage}"></span>
+        <button class="alert-close" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>
+    </div>
+    <div th:if="${infoMessage}" class="alert alert-info alert-dismissible">
+        <i class="fas fa-info-circle"></i>
+        <span th:text="${infoMessage}"></span>
+        <button class="alert-close" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>
+    </div>
+</div>
+
+</body>
+</html>
+

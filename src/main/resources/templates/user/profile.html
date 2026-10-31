@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('My Profile')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<div class="page-header">
+    <div class="container">
+        <div th:replace="~{fragments/layout :: flash-messages}"></div>
+        <div class="page-header-content">
+            <h1 class="page-title"><i class="fas fa-user-circle"></i> My Profile</h1>
+            <p class="page-subtitle">Manage your account information and settings</p>
+        </div>
+    </div>
+</div>
+
+<div class="container profile-page">
+    <div class="profile-grid">
+        <!-- Profile Card -->
+        <div class="profile-card">
+            <div class="profile-header">
+                <div class="profile-avatar-lg">
+                    <i class="fas fa-user"></i>
+                </div>
+                <h2 class="profile-name" th:text="${currentUser.fullName}">Name</h2>
+                <span class="role-badge" th:classappend="'role-' + ${currentUser.role.name().toLowerCase()}"
+                      th:text="${currentUser.role.name()}">STUDENT</span>
+                <p class="profile-email" th:text="${currentUser.email}">email</p>
+            </div>
+            <div class="profile-details-list">
+                <div class="profile-detail">
+                    <span class="detail-label"><i class="fas fa-id-badge"></i> College ID</span>
+                    <span class="detail-value" th:text="${currentUser.collegeId}">ID</span>
+                </div>
+                <div class="profile-detail">
+                    <span class="detail-label"><i class="fas fa-phone"></i> Phone</span>
+                    <span class="detail-value" th:text="${currentUser.phone ?: 'Not set'}">Phone</span>
+                </div>
+                <div class="profile-detail">
+                    <span class="detail-label"><i class="fas fa-building"></i> Department</span>
+                    <span class="detail-value" th:text="${currentUser.department ?: 'Not set'}">Dept</span>
+                </div>
+                <div class="profile-detail">
+                    <span class="detail-label"><i class="fas fa-graduation-cap"></i> Year</span>
+                    <span class="detail-value" th:text="${currentUser.yearOfStudy ?: 'Not set'}">Year</span>
+                </div>
+                <div class="profile-detail">
+                    <span class="detail-label"><i class="fas fa-calendar-alt"></i> Joined</span>
+                    <span class="detail-value" th:text="${#temporals.format(currentUser.createdAt, 'MMMM dd, yyyy')}">Date</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Forms -->
+        <div class="profile-forms">
+            <!-- Update Profile -->
+            <div class="form-card">
+                <div class="form-card-header form-header-blue">
+                    <div class="form-header-icon"><i class="fas fa-edit"></i></div>
+                    <div>
+                        <h2>Edit Profile</h2>
+                        <p>Update your personal information</p>
+                    </div>
+                </div>
+                <form th:action="@{/profile/update}" method="post" class="profile-form">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+                    <div class="form-group">
+                        <label class="form-label required">Full Name</label>
+                        <input type="text" name="fullName" th:value="${currentUser.fullName}" class="form-control" required>
+                    </div>
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label class="form-label">Phone</label>
+                            <input type="tel" name="phone" th:value="${currentUser.phone}" class="form-control" placeholder="10-digit number">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Department</label>
+                            <input type="text" name="department" th:value="${currentUser.department}" class="form-control">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Year of Study</label>
+                        <select name="yearOfStudy" class="form-control form-select">
+                            <option value="">Select</option>
+                            <option value="1st Year" th:selected="${currentUser.yearOfStudy == '1st Year'}">1st Year</option>
+                            <option value="2nd Year" th:selected="${currentUser.yearOfStudy == '2nd Year'}">2nd Year</option>
+                            <option value="3rd Year" th:selected="${currentUser.yearOfStudy == '3rd Year'}">3rd Year</option>
+                            <option value="4th Year" th:selected="${currentUser.yearOfStudy == '4th Year'}">4th Year</option>
+                            <option value="5th Year" th:selected="${currentUser.yearOfStudy == '5th Year'}">5th Year</option>
+                            <option value="PG - 1st Year" th:selected="${currentUser.yearOfStudy == 'PG - 1st Year'}">PG - 1st Year</option>
+                            <option value="PG - 2nd Year" th:selected="${currentUser.yearOfStudy == 'PG - 2nd Year'}">PG - 2nd Year</option>
+                            <option value="Staff" th:selected="${currentUser.yearOfStudy == 'Staff'}">Staff</option>
+                            <option value="Faculty" th:selected="${currentUser.yearOfStudy == 'Faculty'}">Faculty</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </form>
+            </div>
+
+            <!-- Change Password -->
+            <div class="form-card">
+                <div class="form-card-header form-header-warning">
+                    <div class="form-header-icon"><i class="fas fa-lock"></i></div>
+                    <div>
+                        <h2>Change Password</h2>
+                        <p>Update your account password</p>
+                    </div>
+                </div>
+                <form th:action="@{/profile/change-password}" method="post" class="profile-form">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+                    <div class="form-group">
+                        <label class="form-label required">Current Password</label>
+                        <input type="password" name="currentPassword" class="form-control" required>
+                    </div>
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label class="form-label required">New Password</label>
+                            <input type="password" name="newPassword" class="form-control" required minlength="8" placeholder="Min. 8 characters">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label required">Confirm New Password</label>
+                            <input type="password" name="confirmPassword" class="form-control" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-warning btn-lg">
+                        <i class="fas fa-key"></i> Update Password
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<script th:src="@{/js/main.js}"></script>
+</body>
+</html>
+

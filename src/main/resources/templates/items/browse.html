@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Browse Items')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<div class="page-header">
+    <div class="container">
+        <div th:replace="~{fragments/layout :: flash-messages}"></div>
+        <div class="page-header-content">
+            <h1 class="page-title"><i class="fas fa-th-list"></i> Browse Items</h1>
+            <p class="page-subtitle">Search through all lost and found items reported on campus</p>
+        </div>
+        <div class="page-header-actions" sec:authorize="isAuthenticated()">
+            <a th:href="@{/items/report/lost}" class="btn btn-danger-outline">
+                <i class="fas fa-exclamation-circle"></i> Report Lost
+            </a>
+            <a th:href="@{/items/report/found}" class="btn btn-success-outline">
+                <i class="fas fa-box-open"></i> Report Found
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="browse-layout container">
+    <!-- FILTERS SIDEBAR -->
+    <aside class="filters-sidebar">
+        <div class="filters-card">
+            <div class="filters-header">
+                <h3><i class="fas fa-filter"></i> Filters</h3>
+                <a th:href="@{/items}" class="clear-filters">Clear All</a>
+            </div>
+
+            <form th:action="@{/items}" method="get" id="filterForm">
+                <!-- Search -->
+                <div class="filter-group">
+                    <label class="filter-label">Search</label>
+                    <div class="search-input-wrap">
+                        <input type="text" name="keyword" th:value="${keyword}" class="form-control" placeholder="Search items...">
+                        <i class="fas fa-search search-icon"></i>
+                    </div>
+                </div>
+
+                <!-- Item Type -->
+                <div class="filter-group">
+                    <label class="filter-label">Type</label>
+                    <div class="type-toggle">
+                        <label class="type-option" th:classappend="${selectedItemType == null} ? 'active'">
+                            <input type="radio" name="itemType" value="" th:checked="${selectedItemType == null}"> All
+                        </label>
+                        <label class="type-option type-lost" th:classappend="${selectedItemType != null and selectedItemType.name() == 'LOST'} ? 'active'">
+                            <input type="radio" name="itemType" value="LOST" th:checked="${selectedItemType != null and selectedItemType.name() == 'LOST'}">
+                            <i class="fas fa-exclamation-circle"></i> Lost
+                        </label>
+                        <label class="type-option type-found" th:classappend="${selectedItemType != null and selectedItemType.name() == 'FOUND'} ? 'active'">
+                            <input type="radio" name="itemType" value="FOUND" th:checked="${selectedItemType != null and selectedItemType.name() == 'FOUND'}">
+                            <i class="fas fa-box-open"></i> Found
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Category -->
+                <div class="filter-group">
+                    <label class="filter-label">Category</label>
+                    <select name="category" class="form-control form-select">
+                        <option value="">All Categories</option>
+                        <option th:each="cat : ${categories}" th:value="${cat.name()}"
+                                th:text="${cat.displayName}"
+                                th:selected="${selectedCategory != null and selectedCategory.name() == cat.name()}">
+                        </option>
+                    </select>
+                </div>
+
+                <!-- Location -->
+                <div class="filter-group">
+                    <label class="filter-label">Location</label>
+                    <input type="text" name="location" th:value="${location}" class="form-control" placeholder="e.g. Library, Block A">
+                </div>
+
+                <!-- Date From -->
+                <div class="filter-group">
+                    <label class="filter-label">Date From</label>
+                    <input type="date" name="dateFrom" th:value="${dateFrom}" class="form-control">
+                </div>
+
+                <!-- Date To -->
+                <div class="filter-group">
+                    <label class="filter-label">Date To</label>
+                    <input type="date" name="dateTo" th:value="${dateTo}" class="form-control">
+                </div>
+
+                <!-- Sort -->
+                <div class="filter-group">
+                    <label class="filter-label">Sort By</label>
+                    <select name="sort" class="form-control form-select">
+                        <option value="newest" th:selected="${sort == 'newest'}">Newest First</option>
+                        <option value="oldest" th:selected="${sort == 'oldest'}">Oldest First</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-full">
+                    <i class="fas fa-search"></i> Apply Filters
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <!-- ITEMS MAIN -->
+    <main class="items-main">
+        <div class="items-toolbar">
+            <div class="items-count">
+                <span th:if="${items.totalElements > 0}">
+                    Showing <strong th:text="${items.numberOfElements}">0</strong>
+                    of <strong th:text="${items.totalElements}">0</strong> items
+                </span>
+                <span th:unless="${items.totalElements > 0}">No items found</span>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div th:if="${items.empty}" class="empty-state">
+            <div class="empty-icon"><i class="fas fa-search"></i></div>
+            <h3>No Items Found</h3>
+            <p>Try adjusting your search filters or be the first to report a lost or found item.</p>
+            <div class="empty-actions" sec:authorize="isAuthenticated()">
+                <a th:href="@{/items/report/lost}" class="btn btn-primary">Report Lost Item</a>
+                <a th:href="@{/items/report/found}" class="btn btn-success">Report Found Item</a>
+            </div>
+        </div>
+
+        <!-- Items Grid -->
+        <div class="items-grid" th:unless="${items.empty}">
+            <div th:each="item : ${items.content}" class="item-card">
+                <div class="item-card-badge" th:classappend="${item.itemType.name() == 'LOST'} ? 'badge-lost' : 'badge-found'">
+                    <i th:class="${item.itemType.name() == 'LOST'} ? 'fas fa-exclamation-circle' : 'fas fa-box-open'"></i>
+                    <span th:text="${item.itemType.name()}">LOST</span>
+                </div>
+                <div class="item-status-badge" th:if="${item.status.name() != 'ACTIVE'}"
+                     th:classappend="'status-' + ${item.status.name().toLowerCase()}"
+                     th:text="${item.status.name()}">CLAIMED</div>
+                <div class="item-card-image">
+                    <img th:if="${item.imagePath != null}" th:src="@{'/uploads/' + ${item.imagePath}}" alt="Item Image">
+                    <div th:unless="${item.imagePath != null}" class="item-card-placeholder">
+                        <i th:class="${item.category.name() == 'ELECTRONICS' ? 'fas fa-laptop' : (item.category.name() == 'KEYS' ? 'fas fa-key' : (item.category.name() == 'BOOKS_NOTES' ? 'fas fa-book' : (item.category.name() == 'BAGS' ? 'fas fa-shopping-bag' : (item.category.name() == 'ID_CARDS' ? 'fas fa-id-card' : 'fas fa-box'))))}"></i>
+                    </div>
+                </div>
+                <div class="item-card-body">
+                    <div class="item-category-tag" th:text="${item.category.displayName}">Electronics</div>
+                    <h3 class="item-name" th:text="${item.itemName}">Item Name</h3>
+                    <p class="item-desc" th:text="${#strings.abbreviate(item.description, 90)}">Description</p>
+                    <div class="item-meta">
+                        <span class="item-meta-tag">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span th:text="${item.location}">Location</span>
+                        </span>
+                        <span class="item-meta-tag">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span th:text="${#temporals.format(item.date, 'MMM dd, yyyy')}">Date</span>
+                        </span>
+                    </div>
+                    <div class="item-card-footer">
+                        <a th:href="@{'/items/' + ${item.id}}" class="btn btn-view-item">
+                            View Details <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination-wrap" th:if="${totalPages > 1}">
+            <div class="pagination">
+                <a class="page-btn" th:if="${currentPage > 0}"
+                   th:href="@{/items(page=${currentPage - 1}, keyword=${keyword}, category=${selectedCategory}, itemType=${selectedItemType}, location=${location}, sort=${sort})}">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+                <span class="page-info">Page <strong th:text="${currentPage + 1}">1</strong> of <strong th:text="${totalPages}">1</strong></span>
+                <a class="page-btn" th:if="${currentPage < totalPages - 1}"
+                   th:href="@{/items(page=${currentPage + 1}, keyword=${keyword}, category=${selectedCategory}, itemType=${selectedItemType}, location=${location}, sort=${sort})}">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </div>
+        </div>
+    </main>
+</div>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<script th:src="@{/js/main.js}"></script>
+</body>
+</html>

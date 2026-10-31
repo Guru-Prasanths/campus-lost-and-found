@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Claim Details')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<div class="container detail-page">
+    <div th:replace="~{fragments/layout :: flash-messages}"></div>
+
+    <div class="detail-breadcrumb">
+        <a th:href="@{/}">Home</a> <i class="fas fa-chevron-right"></i>
+        <a th:href="@{/claims}">My Claims</a> <i class="fas fa-chevron-right"></i>
+        <span>Claim #<span th:text="${claim.id}">ID</span></span>
+    </div>
+
+    <div class="claim-detail-grid">
+        <div class="claim-detail-main">
+            <div class="detail-card">
+                <div class="claim-detail-header">
+                    <div>
+                        <h1 class="detail-title">Claim #<span th:text="${claim.id}">ID</span></h1>
+                        <p>Submitted on <span th:text="${#temporals.format(claim.createdAt, 'MMMM dd, yyyy HH:mm')}">Date</span></p>
+                    </div>
+                    <span class="status-badge lg" th:classappend="'claim-status-' + ${claim.status.name().toLowerCase()}"
+                          th:text="${claim.status.name()}">PENDING</span>
+                </div>
+
+                <div class="claim-item-preview">
+                    <h3 class="section-title-sm">Item Being Claimed</h3>
+                    <div class="claim-item-card">
+                        <div class="claim-item-image">
+                            <img th:if="${claim.item.imagePath != null}" th:src="@{'/uploads/' + ${claim.item.imagePath}}" alt="Item">
+                            <div th:unless="${claim.item.imagePath != null}" class="item-placeholder-sm"><i class="fas fa-box"></i></div>
+                        </div>
+                        <div class="claim-item-details">
+                            <div class="type-badge-sm" th:classappend="${claim.item.itemType.name() == 'LOST'} ? 'badge-lost' : 'badge-found'"
+                                 th:text="${claim.item.itemType.name()}">LOST</div>
+                            <h4 th:text="${claim.item.itemName}">Item Name</h4>
+                            <p th:text="${claim.item.category.displayName + ' · ' + claim.item.location}">Details</p>
+                        </div>
+                        <a th:href="@{'/items/' + ${claim.item.id}}" class="btn btn-sm btn-outline">View Item</a>
+                    </div>
+                </div>
+
+                <div class="claim-proof-section">
+                    <h3 class="section-title-sm"><i class="fas fa-shield-alt"></i> Proof of Ownership</h3>
+                    <div class="proof-box">
+                        <p th:text="${claim.proofOfOwnership}">Proof</p>
+                    </div>
+                </div>
+
+                <div class="claim-additional" th:if="${claim.additionalInfo != null and !claim.additionalInfo.isEmpty()}">
+                    <h3 class="section-title-sm"><i class="fas fa-info-circle"></i> Additional Information</h3>
+                    <div class="proof-box">
+                        <p th:text="${claim.additionalInfo}">Info</p>
+                    </div>
+                </div>
+
+                <div class="claim-admin-section" th:if="${claim.adminNotes != null and !claim.adminNotes.isEmpty()}">
+                    <h3 class="section-title-sm"><i class="fas fa-comment-dots"></i> Admin Notes</h3>
+                    <div class="admin-notes-box">
+                        <p th:text="${claim.adminNotes}">Notes</p>
+                    </div>
+                </div>
+
+                <div class="claim-resolved" th:if="${claim.resolvedAt != null}">
+                    <p><i class="fas fa-check-circle"></i> Resolved on <strong th:text="${#temporals.format(claim.resolvedAt, 'MMMM dd, yyyy HH:mm')}">Date</strong></p>
+                </div>
+            </div>
+        </div>
+
+        <aside class="claim-detail-sidebar">
+            <!-- Claimant Info -->
+            <div class="sidebar-card">
+                <h4 class="sidebar-card-title"><i class="fas fa-user"></i> Claimant</h4>
+                <div class="claimant-info">
+                    <div class="claimant-avatar"><i class="fas fa-user-circle"></i></div>
+                    <div>
+                        <div class="claimant-name" th:text="${claim.claimant.fullName}">Name</div>
+                        <div class="claimant-id" th:text="${claim.claimant.collegeId}">ID</div>
+                        <div class="claimant-dept" th:text="${claim.claimant.department}">Dept</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Actions -->
+            <div class="sidebar-card" th:if="${isAdmin != null and isAdmin and claim.status.name() == 'PENDING'}">
+                <h4 class="sidebar-card-title"><i class="fas fa-shield-alt"></i> Admin Actions</h4>
+
+                <form th:action="@{'/admin/claims/' + ${claim.id} + '/approve'}" method="post" class="admin-action-form">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <textarea name="notes" class="form-control form-textarea-sm" placeholder="Approval notes (optional)"></textarea>
+                    <button type="submit" class="btn btn-success btn-full" onclick="return confirm('Approve this claim?')">
+                        <i class="fas fa-check"></i> Approve Claim
+                    </button>
+                </form>
+
+                <form th:action="@{'/admin/claims/' + ${claim.id} + '/reject'}" method="post" class="admin-action-form">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <textarea name="notes" class="form-control form-textarea-sm" placeholder="Reason for rejection (required)"></textarea>
+                    <button type="submit" class="btn btn-danger btn-full" onclick="return confirm('Reject this claim?')">
+                        <i class="fas fa-times"></i> Reject Claim
+                    </button>
+                </form>
+
+                <form th:action="@{'/admin/claims/' + ${claim.id} + '/review'}" method="post">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <button type="submit" class="btn btn-warning btn-full">
+                        <i class="fas fa-search"></i> Mark Under Review
+                    </button>
+                </form>
+            </div>
+
+            <!-- Withdraw (for pending claims by claimant) -->
+            <div class="sidebar-card" th:if="${currentUser.id == claim.claimant.id and claim.status.name() == 'PENDING'}">
+                <form th:action="@{'/claims/' + ${claim.id} + '/withdraw'}" method="post">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <button type="submit" class="btn btn-ghost btn-full" onclick="return confirm('Withdraw this claim?')">
+                        <i class="fas fa-times-circle"></i> Withdraw Claim
+                    </button>
+                </form>
+            </div>
+
+            <a th:href="@{/claims}" class="btn btn-outline btn-full">
+                <i class="fas fa-arrow-left"></i> Back to Claims
+            </a>
+        </aside>
+    </div>
+</div>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<script th:src="@{/js/main.js}"></script>
+</body>
+</html>
+

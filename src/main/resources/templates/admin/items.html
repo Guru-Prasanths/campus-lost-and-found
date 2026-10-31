@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Admin - Manage Items')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<div class="admin-layout">
+    <aside class="admin-sidebar">
+        <div class="admin-sidebar-header">
+            <div class="admin-badge"><i class="fas fa-shield-alt"></i> Admin Panel</div>
+        </div>
+        <nav class="admin-nav">
+            <a th:href="@{/admin}" class="admin-nav-item"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+            <a th:href="@{/admin/items}" class="admin-nav-item active"><i class="fas fa-boxes"></i> Manage Items</a>
+            <a th:href="@{/admin/claims}" class="admin-nav-item"><i class="fas fa-clipboard-list"></i> Manage Claims</a>
+            <a th:href="@{/admin/users}" class="admin-nav-item"><i class="fas fa-users"></i> Manage Users</a>
+        </nav>
+    </aside>
+
+    <main class="admin-main">
+        <div class="admin-page-header">
+            <div th:replace="~{fragments/layout :: flash-messages}"></div>
+            <h1 class="admin-page-title"><i class="fas fa-boxes"></i> Manage Items</h1>
+        </div>
+
+        <div class="admin-table-card">
+            <div th:if="${items.empty}" class="admin-empty">
+                <i class="fas fa-inbox"></i>
+                <p>No items found</p>
+            </div>
+            <table class="admin-table admin-table-full" th:unless="${items.empty}">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Item</th>
+                        <th>Category</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th>Location</th>
+                        <th>Reported By</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="item : ${items.content}">
+                        <td><strong>#<span th:text="${item.id}">0</span></strong></td>
+                        <td>
+                            <a th:href="@{'/items/' + ${item.id}}" class="table-link" th:text="${item.itemName}">Item</a>
+                        </td>
+                        <td th:text="${item.category.displayName}">Category</td>
+                        <td>
+                            <span class="type-badge-xs" th:classappend="${item.itemType.name() == 'LOST'} ? 'badge-lost' : 'badge-found'"
+                                  th:text="${item.itemType.name()}">LOST</span>
+                        </td>
+                        <td>
+                            <span class="status-badge status-xs" th:classappend="'status-' + ${item.status.name().toLowerCase()}"
+                                  th:text="${item.status.name()}">ACTIVE</span>
+                        </td>
+                        <td th:text="${item.location}">Location</td>
+                        <td>
+                            <div class="table-user">
+                                <strong th:text="${item.reportedBy.fullName}">Name</strong>
+                                <small th:text="${item.reportedBy.collegeId}">ID</small>
+                            </div>
+                        </td>
+                        <td th:text="${#temporals.format(item.date, 'MMM dd, yyyy')}">Date</td>
+                        <td>
+                            <div class="action-buttons">
+                                <a th:href="@{'/items/' + ${item.id}}" class="btn btn-xs btn-outline">View</a>
+                                <div class="dropdown-inline">
+                                    <button class="btn btn-xs btn-primary dropdown-toggle-btn" onclick="this.nextElementSibling.classList.toggle('show')">
+                                        Status <i class="fas fa-caret-down"></i>
+                                    </button>
+                                    <div class="dropdown-inline-menu">
+                                        <form th:action="@{'/admin/items/' + ${item.id} + '/status'}" method="post">
+                                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                            <input type="hidden" name="status" value="ACTIVE"/>
+                                            <button type="submit" class="dropdown-item-btn">Active</button>
+                                        </form>
+                                        <form th:action="@{'/admin/items/' + ${item.id} + '/status'}" method="post">
+                                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                            <input type="hidden" name="status" value="RETURNED"/>
+                                            <button type="submit" class="dropdown-item-btn">Returned</button>
+                                        </form>
+                                        <form th:action="@{'/admin/items/' + ${item.id} + '/status'}" method="post">
+                                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                            <input type="hidden" name="status" value="CLOSED"/>
+                                            <button type="submit" class="dropdown-item-btn">Closed</button>
+                                        </form>
+                                    </div>
+                                </div>
+                                <form th:action="@{'/admin/items/' + ${item.id} + '/delete'}" method="post" style="display:inline">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                    <button type="submit" class="btn btn-xs btn-danger"
+                                            onclick="return confirm('Delete this item permanently?')">Delete</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination-wrap" th:if="${items.totalPages > 1}">
+            <div class="pagination">
+                <a class="page-btn" th:if="${items.number > 0}" th:href="@{/admin/items(page=${items.number - 1})}">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+                <span class="page-info">Page <strong th:text="${items.number + 1}">1</strong> of <strong th:text="${items.totalPages}">1</strong></span>
+                <a class="page-btn" th:if="${items.number < items.totalPages - 1}" th:href="@{/admin/items(page=${items.number + 1})}">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </div>
+        </div>
+    </main>
+</div>
+<script th:src="@{/js/main.js}"></script>
+</body>
+</html>
+
